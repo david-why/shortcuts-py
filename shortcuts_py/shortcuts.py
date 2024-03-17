@@ -1,10 +1,14 @@
 import plistlib
-from typing import Any
+from typing import Any, TypeVar
 from uuid import uuid4
 
 from shortcuts_py.consts import ALL_WORKFLOW_TYPES, WorkflowType
+from shortcuts_py.data import shortcut_data
+from shortcuts_py.templ import TemplateStr
 from shortcuts_py.utils import sign_shortcut
-from shortcuts_py.variable import ContentItemClass, TemplateStr, Variable
+from shortcuts_py.variable import ContentItemClass, Variable
+
+VariableT = TypeVar('VariableT', bound=Variable)
 
 
 class Action:
@@ -14,12 +18,10 @@ class Action:
         self.identifier = identifier
         self.parameters = parameters or {}
 
-    def output(self, name: str) -> Variable:
+    def output(self, name: str, cls: type[VariableT] = Variable) -> VariableT:
         if 'UUID' not in self.parameters:
             self.parameters['UUID'] = str(uuid4()).upper()
-        return Variable(
-            'ActionOutput', OutputName=name, OutputUUID=self.parameters['UUID']
-        )
+        return cls('ActionOutput', OutputName=name, OutputUUID=self.parameters['UUID'])
 
     def dump(self) -> dict[str, Any]:
         data: dict[str, Any] = {'WFWorkflowActionIdentifier': self.identifier}
@@ -34,19 +36,17 @@ class Action:
         return data
 
 
-shortcut_data = None
-
-
 def begin_shortcut():
-    global shortcut_data
-    if shortcut_data is not None:
+    if shortcut_data.get('started'):
         raise RuntimeError('Shortcut already started')
-    shortcut_data = {'actions': [], 'input': None}
+    shortcut_data['started'] = True
+    shortcut_data['actions'] = []
+    shortcut_data['input'] = None
+    shortcut_data['stack'] = []
 
 
 def build_shortcut(sign: bool = False):
-    global shortcut_data
-    if shortcut_data is None:
+    if not shortcut_data.get('started'):
         raise RuntimeError('Shortcut not started')
     data = {
         'WFWorkflowMinimumClientVersionString': '900',
@@ -78,7 +78,7 @@ def build_shortcut(sign: bool = False):
                 data['WFWorkflowNoInputBehavior']['Parameters'][
                     'SerializedParameters'
                 ] = {'WFSelectMultiple': True}
-    shortcut_data = None
+    shortcut_data['started'] = False
     content = plistlib.dumps(data, fmt=plistlib.FMT_BINARY)
     if sign:
         content = sign_shortcut(content)
@@ -92,7 +92,7 @@ def shortcut_input(
     or_else: ContentItemClass | None = None,
     multiple: bool = False,
 ) -> Variable:
-    assert shortcut_data
+    assert shortcut_data.get('started')
     if shortcut_data['input'] is not None:
         raise RuntimeError('Shortcut input already set')
     or_else = {ContentItemClass.Image: ContentItemClass.PhotoMedia, None: None}.get(

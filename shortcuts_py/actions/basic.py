@@ -1,18 +1,19 @@
 from typing import Any, Literal, overload
 
-from shortcuts_py.consts import Text
+from shortcuts_py.consts import Number, Text
 from shortcuts_py.shortcuts import Action
+from shortcuts_py.templ import TemplateStr
 from shortcuts_py.utils import parse_attachment, parse_dict
-from shortcuts_py.variable import ContentItemClass, TemplateStr, Variable, coerce
+from shortcuts_py.variable import NumberVariable, TextVariable, Variable
 
 __all__ = ['text', 'show_result', 'ask_for_input', 'requests', 'b64encode']
 
 
-def text(text: Text) -> Variable:
+def text(text: Text) -> TextVariable:
     action = Action(
         'is.workflow.actions.gettext', {'WFTextActionText': TemplateStr(text).dump()}
     )
-    return action.output('Text')
+    return action.output('Text', TextVariable)
 
 
 def show_result(text: Text) -> None:
@@ -21,11 +22,18 @@ def show_result(text: Text) -> None:
 
 @overload
 def ask_for_input(
-    type: Literal['Text', 'URL', 'Date', 'Date and Time', 'Time'] | type[str],
+    type: Literal['URL', 'Date', 'Date and Time', 'Time'],
     prompt: str,
     *,
     default: Text | None = None,
 ) -> Variable: ...
+@overload
+def ask_for_input(
+    type: Literal['Text'] | type[str],
+    prompt: str,
+    *,
+    default: Text | None = None,
+) -> TextVariable: ...
 @overload
 def ask_for_input(
     type: Literal['Number'] | type[int] | type[float],
@@ -33,7 +41,7 @@ def ask_for_input(
     *,
     allow_negative: bool = True,
     allow_decimal: bool = True,
-    default: float | None = None,
+    default: Number | None = None,
 ) -> Variable: ...
 def ask_for_input(
     type, prompt, *, default=None, allow_negative=True, allow_decimal=True
@@ -56,9 +64,9 @@ def ask_for_input(
     action = Action('is.workflow.actions.ask', params)
     var = action.output('Provided Input')
     if type == 'Number':
-        var = coerce(var, ContentItemClass.Number)
+        var = NumberVariable.of(var)
     elif type == 'Text':
-        var = coerce(var, ContentItemClass.Text)
+        var = TextVariable.of(var)
     return var
 
 
@@ -150,4 +158,4 @@ def b64encode(
         'is.workflow.actions.base64encode',
         {'WFInput': parse_attachment(data), 'WFBase64LineBreakMode': line_break},
     )
-    return action.output('Base64 Encoded')
+    return action.output('Base64 Encoded', TextVariable)

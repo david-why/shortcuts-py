@@ -3,7 +3,7 @@ from typing import Any
 import requests
 
 from shortcuts_py.consts import Text
-from shortcuts_py.variable import ContentItemClass, Variable, TemplateStr
+from shortcuts_py.templ import TemplateStr
 
 __all__ = ['sign_shortcut']
 
@@ -19,6 +19,8 @@ def sign_shortcut(data: bytes):
 
 
 def parse_dict_list(data: list[Any]):
+    from shortcuts_py.variable import ContentItemClass  # prevent circular import
+
     value = []
     for item in data:
         if isinstance(item, str):
@@ -57,7 +59,7 @@ def parse_dict_list(data: list[Any]):
                     },
                 }
             )
-        elif isinstance(item, Variable):
+        elif getattr(item, '__shortcuts_is_variable__', False):
             if item.coercion_type is None:
                 raise ValueError('List items must have a coercion type')
             if item.coercion_type is ContentItemClass.Text:
@@ -79,6 +81,8 @@ def parse_dict_list(data: list[Any]):
 
 
 def parse_dict(data: dict[Text, Any]):
+    from shortcuts_py.variable import ContentItemClass  # prevent circular import
+
     items = []
     for k, v in data.items():
         k = TemplateStr(k)
@@ -103,7 +107,7 @@ def parse_dict(data: dict[Text, Any]):
                 'Value': parse_dict(v),
                 'WFSerializationType': 'WFDictionaryFieldValue',
             }
-        elif isinstance(v, Variable):
+        elif getattr(v, '__shortcuts_is_variable__', False):
             if v.coercion_type is None:
                 raise ValueError('Dictionary values must have a coercion type')
             if v.coercion_type is ContentItemClass.Text:
@@ -130,6 +134,6 @@ def parse_dict(data: dict[Text, Any]):
 def parse_attachment(value: Any):
     if isinstance(value, (str, int, float)):
         return str(value)
-    if isinstance(value, Variable):
+    if getattr(value, '__shortcuts_is_variable__', False):
         return {'Value': value.dump(), 'WFSerializationType': 'WFTextTokenAttachment'}
     raise ValueError('Unsupported text attachment type')

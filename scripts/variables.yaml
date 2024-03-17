@@ -1,0 +1,133 @@
+variables:
+  DictVariable:
+    type: Dictionary
+    getitem:
+      key: str
+      aggrandizement: WFDictionaryValueVariableAggrandizement
+      property: DictionaryKey
+      returns: Variable
+  TextVariable:
+    type: Text
+    conditions:
+      __eq__:
+        type: 4
+        params:
+          - name: text
+            type: Text
+            parameter: WFConditionalActionString
+      __ne__:
+        type: 5
+        params:
+          - name: text
+            type: Text
+            parameter: WFConditionalActionString
+      __contains__:
+        type: 99
+        params:
+          - name: text
+            type: Text
+            parameter: WFConditionalActionString
+      does_not_contain:
+        type: 999
+        params:
+          - name: text
+            type: Text
+            parameter: WFConditionalActionString
+      startswith:
+        type: 8
+        params:
+          - name: text
+            type: Text
+            parameter: WFConditionalActionString
+      endswith:
+        type: 9
+        params:
+          - name: text
+            type: Text
+            parameter: WFConditionalActionString
+  NumberVariable:
+    type: Number
+    conditions:
+      __eq__:
+        type: 4
+        params:
+          - name: value
+            type: Number
+            parameter: WFNumberValue
+            attachment: true
+      __ne__:
+        type: 5
+        params:
+          - name: value
+            type: Number
+            parameter: WFNumberValue
+            attachment: true
+      __gt__:
+        type: 2
+        params:
+          - name: value
+            type: Number
+            parameter: WFNumberValue
+            attachment: true
+      __ge__:
+        type: 3
+        params:
+          - name: value
+            type: Number
+            parameter: WFNumberValue
+            attachment: true
+      __lt__:
+        type: 0
+        params:
+          - name: value
+            type: Number
+            parameter: WFNumberValue
+            attachment: true
+      __le__:
+        type: 1
+        params:
+          - name: value
+            type: Number
+            parameter: WFNumberValue
+            attachment: true
+      is_between:
+        type: 1003
+        params:
+          - name: lower
+            type: Number
+            parameter: WFNumberValue
+            attachment: true
+          - name: upper
+            type: Number
+            parameter: WFAnotherNumber
+            attachment: true
+classes:
+  App: WFAppContentItem # Attachment only
+  AppStoreApp: WFAppStoreAppContentItem
+  Article: WFArticleContentItem
+  Boolean: WFBooleanContentItem
+  Contact: WFContactContentItem
+  Date: WFDateContentItem
+  Dictionary: WFDictionaryContentItem
+  Display: WFDisplayContentItem # Attachment only
+  EmailAddress: WFEmailAddressContentItem
+  EventAttendee: WFEKParticipantContentItem
+  File: WFGenericFileContentItem
+  Folder: WFFolderContentItem # Attachment only
+  Image: WFImageContentItem
+  ITunesMedia: WFMPMediaContentItem
+  ITunesProduct: WFiTunesProductContentItem
+  Location: WFLocationContentItem
+  MapsLink: WFDCMapsLinkContentItem
+  Media: WFAVAssetContentItem
+  Number: WFNumberContentItem
+  PDF: WFPDFContentItem
+  PhoneNumber: WFPhoneNumberContentItem
+  PhotoMedia: WFPhotoMediaContentItem # Attachment only
+  Place: WFMKMapItemContentItem
+  RichText: WFRichTextContentItem
+  SafariWebPage: WFSafariWebPageContentItem # Attachment only
+  Text: WFStringContentItem
+  URL: WFURLContentItem
+  VCard: WFVCardContentItem
+  Window: WFWindowContentItem # Attachment only

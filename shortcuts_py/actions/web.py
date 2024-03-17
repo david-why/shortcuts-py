@@ -1,6 +1,7 @@
 from shortcuts_py.consts import Text
 from shortcuts_py.shortcuts import Action
-from shortcuts_py.variable import TemplateStr, Variable
+from shortcuts_py.templ import TemplateStr
+from shortcuts_py.variable import Variable
 
 __all__ = ['get_web_page_contents']
 

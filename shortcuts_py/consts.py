@@ -2,7 +2,8 @@ from enum import StrEnum
 from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
-    from shortcuts_py.variable import TemplateStr, Variable
+    from shortcuts_py.templ import TemplateStr
+    from shortcuts_py.variable import Variable
 
 Text = Union[str, 'TemplateStr', 'Variable']
 Number = Union[int, float, 'Variable']

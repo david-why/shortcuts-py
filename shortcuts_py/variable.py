@@ -2,7 +2,7 @@
 
 import copy
 from enum import StrEnum
-from typing import Any, ClassVar, Literal, Self, cast, overload
+from typing import Any, ClassVar, Literal, overload
 
 from shortcuts_py.condition import Condition
 from shortcuts_py.consts import Number, Text
@@ -55,6 +55,10 @@ class ContentItemClass(StrEnum):
     def __call__(
         self: 'Literal[ContentItemClass.Number]', variable: 'Variable'
     ) -> 'NumberVariable': ...
+    @overload
+    def __call__(
+        self: 'Literal[ContentItemClass.File]', variable: 'Variable'
+    ) -> 'FileVariable': ...
     @overload
     def __call__(self, variable: 'Variable') -> 'Variable': ...
     def __call__(self, variable):
@@ -174,6 +178,10 @@ class NumberVariable(Variable):
         )
 
 
+class FileVariable(Variable):
+    pass
+
+
 @overload
 def coerce(
     variable: Variable, type: Literal[ContentItemClass.Dictionary]
@@ -187,12 +195,17 @@ def coerce(
     variable: Variable, type: Literal[ContentItemClass.Number]
 ) -> NumberVariable: ...
 @overload
+def coerce(
+    variable: Variable, type: Literal[ContentItemClass.File]
+) -> FileVariable: ...
+@overload
 def coerce(variable: Variable, type: ContentItemClass) -> Variable: ...
 def coerce(variable, type):
     new_cls = {
         ContentItemClass.Dictionary: DictVariable,
         ContentItemClass.Text: TextVariable,
         ContentItemClass.Number: NumberVariable,
+        ContentItemClass.File: FileVariable,
     }.get(type)
     if new_cls is not None:
         variable = new_cls.of(variable)

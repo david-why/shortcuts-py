@@ -5,7 +5,7 @@ from uuid import uuid4
 from shortcuts_py.consts import ALL_WORKFLOW_TYPES, WorkflowType
 from shortcuts_py.data import shortcut_data
 from shortcuts_py.templ import TemplateStr
-from shortcuts_py.utils import sign_shortcut
+from shortcuts_py.utils import pop_stack, sign_shortcut
 from shortcuts_py.variable import ContentItemClass, Variable
 
 VariableT = TypeVar('VariableT', bound=Variable)
@@ -14,6 +14,7 @@ VariableT = TypeVar('VariableT', bound=Variable)
 class Action:
     def __init__(self, identifier: str, parameters: dict | None = None) -> None:
         assert shortcut_data
+        pop_stack()
         shortcut_data['actions'].append(self)
         self.identifier = identifier
         self.parameters = parameters or {}
@@ -48,6 +49,9 @@ def begin_shortcut():
 def build_shortcut(sign: bool = False):
     if not shortcut_data.get('started'):
         raise RuntimeError('Shortcut not started')
+    pop_stack()
+    if shortcut_data['stack']:
+        raise RuntimeError('Unclosed control flow block')
     data = {
         'WFWorkflowMinimumClientVersionString': '900',
         'WFWorkflowMinimumClientVersion': 900,

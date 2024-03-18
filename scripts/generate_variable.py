@@ -13,13 +13,14 @@ contents = '''\
 
 import copy
 from enum import StrEnum
-from typing import Any, Literal, Self, cast, overload
+from typing import Any, ClassVar, Literal, overload
 
 from shortcuts_py.condition import Condition
 from shortcuts_py.consts import Number, Text
+from shortcuts_py.templ import TemplateStr
 from shortcuts_py.utils import parse_attachment
 
-__all__ = ['ContentItemClass', 't', 'coerce']
+__all__ = ['ContentItemClass', 'coerce']
 
 
 class ContentItemClass(StrEnum):
@@ -44,6 +45,8 @@ contents += '''\
 
 
 class Variable:
+    __shortcuts_is_variable__: ClassVar[Literal[True]] = True
+
     def __init__(
         self,
         type: str,
@@ -140,47 +143,6 @@ class {cls}(Variable):
 
 '''
     contents += '\n'
-
-contents += '''\
-class TemplateStr:
-    __slots__ = ('parts',)
-
-    parts: list[str | Variable]
-
-    @overload
-    def __new__(cls, /, obj: Self) -> Self: ...
-    @overload
-    def __new__(cls, /, *parts: str | Variable) -> Self: ...
-    def __new__(cls, /, *parts) -> Self:
-        if len(parts) == 1 and isinstance(parts[0], TemplateStr):
-            return cast(Self, parts[0])
-        obj = super().__new__(cls)
-        obj.parts = list(parts)
-        return obj
-
-    def __hash__(self):
-        return hash(tuple(self.parts))
-
-    def dump(self) -> dict[str, Any]:
-        text = ''
-        attachments = {}
-        for part in self.parts:
-            if isinstance(part, str):
-                text += part
-            else:
-                attachments[f'{{{len(text)}, 1}}'] = part.dump()
-                text += '\\ufffc'
-        return {
-            'Value': {'string': text, 'attachmentsByRange': attachments},
-            'WFSerializationType': 'WFTextTokenString',
-        }
-
-
-def t(*parts: str | Variable):
-    return TemplateStr(*parts)
-
-
-'''
 
 for type, cls in type_cls.items():
     contents += f'''\

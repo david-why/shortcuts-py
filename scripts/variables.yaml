@@ -101,6 +101,8 @@ variables:
             type: Number
             parameter: WFAnotherNumber
             attachment: true
+  FileVariable:
+    type: File
 classes:
   App: WFAppContentItem # Attachment only
   AppStoreApp: WFAppStoreAppContentItem

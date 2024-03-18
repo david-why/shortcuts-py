@@ -3,6 +3,7 @@ from typing import Any
 import requests
 
 from shortcuts_py.consts import Text
+from shortcuts_py.data import shortcut_data
 from shortcuts_py.templ import TemplateStr
 
 __all__ = ['sign_shortcut']
@@ -16,6 +17,17 @@ def sign_shortcut(data: bytes):
         files={'upload': ('example.shortcut', data)},
     )
     return r.content
+
+
+def pop_stack():
+    assert shortcut_data['started']
+    while shortcut_data['stack']:
+        entry = shortcut_data['stack'][-1]
+        if entry.get('no_finish') is None or entry['no_finish']:
+            return
+        entry['no_finish'] = True
+        entry['finish']()
+        shortcut_data['stack'].pop()
 
 
 def parse_dict_list(data: list[Any]):

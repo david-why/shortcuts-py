@@ -2,9 +2,11 @@ from enum import StrEnum
 from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
+    from shortcuts_py.file import StaticFile
     from shortcuts_py.templ import TemplateStr
-    from shortcuts_py.variable import Variable
+    from shortcuts_py.variable import FileVariable, Variable
 
+AnyFile = Union['FileVariable', 'StaticFile']
 Text = Union[str, 'TemplateStr', 'Variable']
 Number = Union[int, float, 'Variable']
 

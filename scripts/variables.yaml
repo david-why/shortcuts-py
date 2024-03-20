@@ -103,6 +103,10 @@ variables:
             attachment: true
   FileVariable:
     type: File
+  RichTextVariable:
+    type: RichText
+  PDFVariable:
+    type: PDF
 classes:
   App: WFAppContentItem # Attachment only
   AppStoreApp: WFAppStoreAppContentItem

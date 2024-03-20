@@ -9,17 +9,32 @@ from shortcuts_py.templ import TemplateStr
 __all__ = ['sign_shortcut']
 
 
-def sign_shortcut(data: bytes):
+def sign_shortcut(data: bytes) -> bytes:
     # credit to ActuallyTaylor on GitHub
     # https://github.com/ActuallyTaylor/Open-Jellycuts/blob/fe68218/Jellycuts/Helpers/Signing/ShortcutsSigner.swift#L69
     r = requests.post(
         'https://actuallyhome.herokuapp.com/API/routing/request',
         files={'upload': ('example.shortcut', data)},
     )
+    r.raise_for_status()
     return r.content
 
 
-def pop_stack():
+def download_shortcut(url: str, signed: bool = False) -> bytes:
+    if not url.startswith('https'):
+        shortcut_id = url
+    else:
+        shortcut_id = url.split('/')[-1]
+    data = requests.get(
+        f'https://www.icloud.com/shortcuts/api/records/{shortcut_id}'
+    ).json()
+    shortcut_url = data['fields']['signedShortcut' if signed else 'shortcut']['value'][
+        'downloadURL'
+    ]
+    return requests.get(shortcut_url).content
+
+
+def pop_stack() -> None:
     assert shortcut_data['started']
     while shortcut_data['stack']:
         entry = shortcut_data['stack'][-1]
@@ -30,7 +45,7 @@ def pop_stack():
         shortcut_data['stack'].pop()
 
 
-def parse_dict_list(data: list[Any]):
+def parse_dict_list(data: list[Any]) -> dict[str, Any]:
     from shortcuts_py.variable import ContentItemClass  # prevent circular import
 
     value = []
@@ -92,7 +107,7 @@ def parse_dict_list(data: list[Any]):
     return {'Value': value, 'WFSerializationType': 'WFArrayParameterState'}
 
 
-def parse_dict(data: dict[Text, Any]):
+def parse_dict(data: dict[Text, Any]) -> dict[str, Any]:
     from shortcuts_py.variable import ContentItemClass  # prevent circular import
 
     items = []
@@ -143,9 +158,11 @@ def parse_dict(data: dict[Text, Any]):
     }
 
 
-def parse_attachment(value: Any):
+def parse_attachment(value: Any) -> str | dict[str, Any]:
     if isinstance(value, (str, int, float)):
         return str(value)
     if getattr(value, '__shortcuts_is_variable__', False):
         return {'Value': value.dump(), 'WFSerializationType': 'WFTextTokenAttachment'}
+    if getattr(value, '__shortcuts_is_file__', False):
+        return value.dump()
     raise ValueError('Unsupported text attachment type')

@@ -1,6 +1,6 @@
 from typing import Any, Literal
 
-from shortcuts_py.actions.basic import get_dictionary
+from shortcuts_py.actions.scripting import get_dictionary
 from shortcuts_py.actions.web import get_contents_of_url
 from shortcuts_py.consts import Text
 from shortcuts_py.variable import (

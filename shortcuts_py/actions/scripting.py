@@ -7,36 +7,12 @@ from shortcuts_py.utils import parse_attachment
 from shortcuts_py.variable import DictVariable, NumberVariable, TextVariable, Variable
 
 __all__ = [
-    'text',
-    'show_alert',
-    'show_result',
     'ask_for_input',
     'base64_encode',
     'get_dictionary',
+    'show_alert',
+    'show_result',
 ]
-
-
-def text(text: Text) -> TextVariable:
-    action = Action(
-        'is.workflow.actions.gettext', {'WFTextActionText': TemplateStr(text).dump()}
-    )
-    return action.output('Text', TextVariable)
-
-
-def show_alert(
-    message: Text, title: Text | None = None, *, show_cancel: bool = True
-) -> None:
-    data = {
-        'WFAlertActionMessage': TemplateStr(message).dump(),
-        'WFAlertActionCancelButtonShown': show_cancel,
-    }
-    if title is not None:
-        data['WFAlertActionTitle'] = TemplateStr(title).dump()
-    Action('is.workflow.actions.alert', data)
-
-
-def show_result(text: Text) -> None:
-    Action('is.workflow.actions.showresult', {'Text': TemplateStr(text)})
 
 
 @overload
@@ -107,3 +83,19 @@ def get_dictionary(data: Variable) -> DictVariable:
         'is.workflow.actions.detect.dictionary', {'WFInput': parse_attachment(data)}
     )
     return action.output('Dictionary', DictVariable)
+
+
+def show_alert(
+    message: Text, title: Text | None = None, *, show_cancel: bool = True
+) -> None:
+    data = {
+        'WFAlertActionMessage': TemplateStr(message).dump(),
+        'WFAlertActionCancelButtonShown': show_cancel,
+    }
+    if title is not None:
+        data['WFAlertActionTitle'] = TemplateStr(title).dump()
+    Action('is.workflow.actions.alert', data)
+
+
+def show_result(text: Text) -> None:
+    Action('is.workflow.actions.showresult', {'Text': TemplateStr(text)})

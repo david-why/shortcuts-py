@@ -60,6 +60,14 @@ class ContentItemClass(StrEnum):
         self: 'Literal[ContentItemClass.File]', variable: 'Variable'
     ) -> 'FileVariable': ...
     @overload
+    def __call__(
+        self: 'Literal[ContentItemClass.RichText]', variable: 'Variable'
+    ) -> 'RichTextVariable': ...
+    @overload
+    def __call__(
+        self: 'Literal[ContentItemClass.PDF]', variable: 'Variable'
+    ) -> 'PDFVariable': ...
+    @overload
     def __call__(self, variable: 'Variable') -> 'Variable': ...
     def __call__(self, variable):
         return coerce(variable, self)
@@ -182,6 +190,14 @@ class FileVariable(Variable):
     pass
 
 
+class RichTextVariable(Variable):
+    pass
+
+
+class PDFVariable(Variable):
+    pass
+
+
 @overload
 def coerce(
     variable: Variable, type: Literal[ContentItemClass.Dictionary]
@@ -199,6 +215,12 @@ def coerce(
     variable: Variable, type: Literal[ContentItemClass.File]
 ) -> FileVariable: ...
 @overload
+def coerce(
+    variable: Variable, type: Literal[ContentItemClass.RichText]
+) -> RichTextVariable: ...
+@overload
+def coerce(variable: Variable, type: Literal[ContentItemClass.PDF]) -> PDFVariable: ...
+@overload
 def coerce(variable: Variable, type: ContentItemClass) -> Variable: ...
 def coerce(variable, type):
     new_cls = {
@@ -206,6 +228,8 @@ def coerce(variable, type):
         ContentItemClass.Text: TextVariable,
         ContentItemClass.Number: NumberVariable,
         ContentItemClass.File: FileVariable,
+        ContentItemClass.RichText: RichTextVariable,
+        ContentItemClass.PDF: PDFVariable,
     }.get(type)
     if new_cls is not None:
         variable = new_cls.of(variable)

@@ -95,9 +95,11 @@ class Variable:
             {'Type': 'WFPropertyVariableAggrandizement', 'PropertyName': property}
         )
 
+    @property
     def has_value(self) -> Condition:
         return Condition(self, 100)
 
+    @property
     def has_no_value(self) -> Condition:
         return Condition(self, 101)
 

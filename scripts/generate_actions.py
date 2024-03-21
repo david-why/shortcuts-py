@@ -32,6 +32,8 @@ def parse_param(param, pdata):
 def parse_action(action, data):
     if 'override' in data:
         return data['override']
+    if 'params' not in data:
+        data['params'] = {}
     text = 'def ' + action + '('
     for param, pdata in data['params'].items():
         text += param + ': '
@@ -58,7 +60,7 @@ def parse_action(action, data):
         if 'default' in pdata:
             text += ' = ' + repr(pdata['default'])
         text += ', '
-    text = text[:-2] + '):\n'
+    text = text.rstrip(', ') + '):\n'
     if 'custom_pre' in data:
         for line in data['custom_pre'].splitlines():
             text += '    ' + line + '\n'
@@ -67,7 +69,7 @@ def parse_action(action, data):
         if pdata.get('optional'):
             continue
         text += repr(pdata['id']) + ': ' + parse_param(param, pdata) + ', '
-    text = text[:-2] + '}\n'
+    text = text.rstrip(', ') + '}\n'
     for param, pdata in data['params'].items():
         if not pdata.get('optional'):
             continue

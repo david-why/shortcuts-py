@@ -1,0 +1,298 @@
+actions:
+  scripting:
+    ask_for_input:
+      override: |
+        @overload
+        def ask_for_input(
+            type: Literal['URL', 'Date', 'Date and Time', 'Time'],
+            prompt: str,
+            *,
+            default: Text | None = None,
+        ) -> Variable: ...
+        @overload
+        def ask_for_input(
+            type: Literal['Text'] | type[str],
+            prompt: str,
+            *,
+            default: Text | None = None,
+        ) -> TextVariable: ...
+        @overload
+        def ask_for_input(
+            type: Literal['Number'] | type[int] | type[float],
+            prompt: str,
+            *,
+            allow_negative: bool = True,
+            allow_decimal: bool = True,
+            default: Number | None = None,
+        ) -> Variable: ...
+        def ask_for_input(
+            type, prompt, *, default=None, allow_negative=True, allow_decimal=True
+        ):
+            if type is int:
+                allow_decimal = False
+            type = {int: 'Number', float: 'Number', str: 'Text'}.get(type, type)
+            params = {'WFAskActionPrompt': prompt, 'WFInputType': type}
+            suffix = type.title().replace(' ', '') if type != 'Text' else ''
+            if default is not None:
+                if isinstance(default, (int, float)):
+                    default = str(default)
+                if suffix == 'Number':
+                    params['WFAskActionDefaultAnswerNumber'] = parse_attachment(default)
+                else:
+                    params[f'WFAskActionDefaultAnswer{suffix}'] = TemplateStr(default)
+            if type == 'Number':
+                params['WFAskActionAllowsDecimalNumbers'] = allow_decimal
+                params['WFAskActionAllowsNegativeNumbers'] = allow_negative
+            action = Action('is.workflow.actions.ask', params)
+            var = action.output('Provided Input')
+            if type == 'Number':
+                var = NumberVariable.of(var)
+            elif type == 'Text':
+                var = TextVariable.of(var)
+            return var
+    base64_encode:
+      id: is.workflow.actions.base64encode
+      params:
+        data:
+          id: WFInput
+          type: variable
+        line_break:
+          id: WFBase64LineBreakMode
+          type: enum
+          enum:
+            - Every 64 Characters
+            - Every 76 Characters
+            - None
+          default: Every 76 Characters
+      output:
+        name: Base64 Encoded
+        type: TextVariable
+    get_dictionary:
+      id: is.workflow.actions.detect.dictionary
+      params:
+        data:
+          id: WFInput
+          type: variable
+      output:
+        name: Dictionary
+        type: DictVariable
+    show_alert:
+      id: is.workflow.actions.alert
+      params:
+        message:
+          id: WFAlertActionMessage
+          type: text
+        title:
+          id: WFAlertActionTitle
+          type: text
+          optional: true
+        show_cancel:
+          id: WFAlertActionCancelButtonShown
+          type: bool
+          default: true
+    show_result:
+      id: is.workflow.actions.showresult
+      params:
+        text:
+          id: Text
+          type: text
+  documents:
+    add_pdf_to_books:
+      id: com.apple.iBooks.openin
+      params:
+        file:
+          id: BooksInput
+          type: variable
+    append_to_text_file:
+      id: is.workflow.actions.file.append
+      params:
+        folder:
+          id: WFFile
+          type: file
+        path:
+          id: WFFilePath
+          type: text
+        text:
+          id: WFInput
+          type: text
+        make_new_line:
+          id: WFAppendOnNewLine
+          type: bool
+          default: true
+      output:
+        name: Appended File
+        type: FileVariable
+    create_folder:
+      id: is.workflow.actions.files.createfolder
+      params:
+        parent:
+          id: WFFolder
+          type: file
+        name:
+          id: WFFilePath
+          type: text
+      output:
+        name: Created Folder
+        type: FileVariable
+    combine_text:
+      id: is.workflow.actions.text.combine
+      params:
+        text:
+          id: text
+          type: variable
+        separator:
+          id: WFTextCustomSeparator
+          type: text
+        sep_type:
+          id: WFTextSeparator
+          type: enum
+          enum:
+            - New Lines
+            - Spaces
+            - Custom
+          optional: true
+      output:
+        name: Combined Text
+        type: TextVariable
+      custom_pre: |
+        if sep_type is None:
+            sep_type = 'New Lines' if separator is None else 'Custom'
+    # TODO delete immediately
+    delete_files:
+      id: is.workflow.actions.file.delete
+      params:
+        files:
+          id: WFInput
+          type: file
+    extract_text_from_image:
+      id: is.workflow.actions.extracttextfromimage
+      params:
+        image:
+          id: WFImage
+          type: variable
+      output:
+        name: Text from Image
+        type: TextVariable
+    generate_qr_code:
+      id: is.workflow.actions.generatebarcode
+      params:
+        text:
+          id: WFText
+          type: text
+        correction:
+          id: WFQRErrorCorrectionLevel
+          type: enum
+          enum:
+            - Low
+            - Medium
+            - Quartile
+            - High
+          default: Medium
+      output:
+        name: QR Code
+        # TODO Image type
+    # TODO recursive
+    get_contents_of_folder:
+      id: is.workflow.actions.file.getfoldercontents
+      params:
+        folder:
+          id: WFFolder
+          type: file
+      output:
+        name: Contents of Folder
+        type: FileVariable
+    get_file_from_folder:
+      id: is.workflow.actions.documentpicker.open
+      params:
+        folder:
+          id: WFFile
+          type: file
+        path:
+          id: WFGetFilePath
+          type: str
+        error_not_found:
+          id: WFFileErrorIfNotFound
+          type: bool
+          default: true
+      output:
+        name: File
+        type: FileVariable
+    # TODO make_full_document
+    make_html_from_rich_text:
+      id: is.workflow.actions.gethtmlfromrichtext
+      params:
+        rich_text:
+          id: WFInput
+          type: variable
+      output:
+        name: HTML from Rich Text
+        type: TextVariable
+    make_markdown_from_rich_text:
+      id: is.workflow.actions.getmarkdownfromrichtext
+      params:
+        rich_text:
+          id: WFInput
+          type: variable
+      output:
+        name: Markdown from Rich Text
+        type: TextVariable
+    # TODO make_rich_text_from_{html,markdown}
+    # TODO margin
+    make_pdf:
+      override: |
+        def make_pdf(
+            input: Variable,
+            *,
+            margin: bool = False,
+            pages: int | tuple[int, int] | None = None,
+            merge: Literal['Append', 'Shuffle'] = 'Append'
+        ) -> PDFVariable:
+            params = {'WFInput': parse_attachment(input), 'WFPDFDocumentMergeBehavior': merge}
+            if pages is None:
+                params['WFPDFIncludedPages'] = 'All Pages'
+            elif isinstance(pages, int):
+                params['WFPDFIncludedPages'] = 'Single Page'
+                params['WFPDFSinglePage'] = str(pages)
+            else:
+                params['WFPDFIncludedPages'] = 'Page Range'
+                params['WFPDFPageRangeStart'] = str(pages[0])
+                params['WFPDFPageRangeEnd'] = str(pages[1])
+            action = Action('is.workflow.actions.makepdf', params)
+            return action.output('PDF', PDFVariable)
+    select_file:
+      id: is.workflow.actions.file.select
+      params:
+        multiple:
+          id: SelectMultiple
+          type: bool
+          default: false
+      output:
+        name: File
+        type: FileVariable
+    select_folder:
+      override: |
+        def select_folder(multiple: bool = False):
+            action = Action(
+                'is.workflow.actions.file.select',
+                {'SelectMultiple': multiple, 'WFPickingMode': 'Folders'},
+            )
+            return action.output('File', FileVariable)
+    text:
+      id: is.workflow.actions.gettext
+      params:
+        text:
+          id: WFTextActionText
+          type: text
+      output:
+        name: Text
+        type: TextVariable
+    quick_view:
+      id: is.workflow.actions.previewdocument
+      params:
+        value:
+          id: WFInput
+          type: variable
+        fullscreen:
+          id: WFQuickLookActionFullScreen
+          type: bool
+          default: false

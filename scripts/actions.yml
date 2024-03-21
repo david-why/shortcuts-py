@@ -277,15 +277,6 @@ actions:
                 {'SelectMultiple': multiple, 'WFPickingMode': 'Folders'},
             )
             return action.output('File', FileVariable)
-    text:
-      id: is.workflow.actions.gettext
-      params:
-        text:
-          id: WFTextActionText
-          type: text
-      output:
-        name: Text
-        type: TextVariable
     quick_view:
       id: is.workflow.actions.previewdocument
       params:
@@ -296,3 +287,45 @@ actions:
           id: WFQuickLookActionFullScreen
           type: bool
           default: false
+    # TODO all the params
+    save_to_files:
+      id: is.workflow.actions.documentpicker.save
+      params:
+        file:
+          id: WFInput
+          type: file
+      output:
+        name: Saved File
+        type: FileVariable
+    scan_barcode:
+      id: is.workflow.actions.scanbarcode
+      output:
+        name: QR/Barcode
+        # TODO Barcode class
+    # TODO params??
+    speak_text:
+      id: is.workflow.actions.speaktext
+      params:
+        text:
+          id: WFText
+          type: text
+    # TODO split_text needs to take list of text...
+    # split_text:
+    #   id: is.workflow.actions.text.split
+    #   params:
+    #     text:
+    #       id: WFInput
+    #       type: text
+    #     separator:
+    #       id: WFTextSeparator
+    #       type: text
+    #       optional: true
+    text:
+      id: is.workflow.actions.gettext
+      params:
+        text:
+          id: WFTextActionText
+          type: text
+      output:
+        name: Text
+        type: TextVariable

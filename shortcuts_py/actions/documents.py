@@ -23,8 +23,11 @@ __all__ = [
     'make_pdf',
     'select_file',
     'select_folder',
-    'text',
     'quick_view',
+    'save_to_files',
+    'scan_barcode',
+    'speak_text',
+    'text',
 ]
 
 
@@ -151,15 +154,32 @@ def select_folder(multiple: bool = False):
     return action.output('File', FileVariable)
 
 
-def text(text: Text):
-    params = {'WFTextActionText': TemplateStr(text)}
-    action = Action('is.workflow.actions.gettext', params)
-    return action.output('Text', TextVariable)
-
-
 def quick_view(value: Variable, fullscreen: bool = False):
     params = {
         'WFInput': parse_attachment(value),
         'WFQuickLookActionFullScreen': fullscreen,
     }
     action = Action('is.workflow.actions.previewdocument', params)
+
+
+def save_to_files(file: AnyFile):
+    params = {'WFInput': parse_attachment(file)}
+    action = Action('is.workflow.actions.documentpicker.save', params)
+    return action.output('Saved File', FileVariable)
+
+
+def scan_barcode():
+    params = {}
+    action = Action('is.workflow.actions.scanbarcode', params)
+    return action.output('QR/Barcode')
+
+
+def speak_text(text: Text):
+    params = {'WFText': TemplateStr(text)}
+    action = Action('is.workflow.actions.speaktext', params)
+
+
+def text(text: Text):
+    params = {'WFTextActionText': TemplateStr(text)}
+    action = Action('is.workflow.actions.gettext', params)
+    return action.output('Text', TextVariable)

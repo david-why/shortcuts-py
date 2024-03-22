@@ -26,6 +26,9 @@ def main(argv: list[str]):
     download.add_argument('url', help='sharing URL of the shortcut')
     download.add_argument('output', help='path to the output file')
     download.add_argument(
+        '-j', '--json', action='store_true', help='convert to json format'
+    )
+    download.add_argument(
         '-s', '--signed', action='store_true', help='download signed shortcut'
     )
 
@@ -42,6 +45,8 @@ def main(argv: list[str]):
 
     elif args.command == 'download':
         data = download_shortcut(args.url, signed=args.signed)
+        if args.json:
+            data = json.dumps(plistlib.loads(data), indent=2).encode()
         with open(args.output, 'wb') as f:
             f.write(data)
 

@@ -30,7 +30,7 @@ def get_contents_of_url(
         raise ValueError('GET requests cannot have a body')
     if method != 'GET' and not (json or data):
         raise ValueError('Non-GET requests must have a body')
-    params = {'ShowHeaders': True, 'WFURL': url, 'WFHTTPMethod': method}
+    params = {'ShowHeaders': True, 'WFURL': TemplateStr(url), 'WFHTTPMethod': method}
     if headers:
         params['WFHTTPHeaders'] = parse_dict(cast(dict[Text, Any], headers))
     elif json:

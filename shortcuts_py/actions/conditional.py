@@ -93,14 +93,18 @@ class If:
         )
         assert shortcut_data['stack'][-1] is self.data
         shortcut_data['stack'].pop()
-        return action.output('If Result')
+        self._result = action.output('If Result')
+        return self._result
 
     def on_finish(self):
+        if self._result is not None:
+            return self._result
         action = Action(
             'is.workflow.actions.conditional',
             {'GroupingIdentifier': self.data['grouping'], 'WFControlFlowMode': 2},
         )
-        return action.output('If Result')
+        self._result = action.output('If Result')
+        return self._result
 
     @property
     def result(self) -> Variable:

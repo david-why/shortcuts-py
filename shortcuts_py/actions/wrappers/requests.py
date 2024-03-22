@@ -32,7 +32,7 @@ class Response:
 
 def request(
     method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    url: str,
+    url: Text,
     *,
     headers: dict[str, Any] = {},
     json: dict[Text, Any] | None = None,
@@ -42,12 +42,12 @@ def request(
     return Response(result)
 
 
-def get(url: str, *, headers: dict[str, Any] = {}) -> Response:
+def get(url: Text, *, headers: dict[str, Any] = {}) -> Response:
     return request('GET', url, headers=headers)
 
 
 def post(
-    url: str,
+    url: Text,
     *,
     headers: dict[str, Any] = {},
     json: dict[Text, Any] | None = None,
@@ -57,7 +57,7 @@ def post(
 
 
 def put(
-    url: str,
+    url: Text,
     *,
     headers: dict[str, Any] = {},
     json: dict[Text, Any] | None = None,
@@ -67,7 +67,7 @@ def put(
 
 
 def patch(
-    url: str,
+    url: Text,
     *,
     headers: dict[str, Any] = {},
     json: dict[Text, Any] | None = None,
@@ -77,7 +77,7 @@ def patch(
 
 
 def delete(
-    url: str,
+    url: Text,
     *,
     headers: dict[str, Any] = {},
     json: dict[Text, Any] | None = None,

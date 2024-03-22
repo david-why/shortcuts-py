@@ -133,6 +133,11 @@ class Variable:
         return Condition(self, 101)
 
 
+class VariableVariable(Variable):
+    def __init__(self, name: str):
+        super().__init__('Variable', VariableName=name)
+
+
 class DictVariable(Variable):
     def __getitem__(self, key: 'str') -> 'Variable':
         return self.aggrandize(

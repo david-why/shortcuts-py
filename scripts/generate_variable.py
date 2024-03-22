@@ -104,6 +104,11 @@ class Variable:
         return Condition(self, 101)
 
 
+class VariableVariable(Variable):
+    def __init__(self, name: str):
+        super().__init__('Variable', VariableName=name)
+
+
 '''
 
 for cls, data in DATA['variables'].items():
